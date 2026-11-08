@@ -10,36 +10,60 @@
     body {
       margin: 0;
       min-height: 100vh;
-      display: grid;
-      place-items: center;
 
-      background-image: url("lappenweihnachten.jpeg");
-      background-size: contain;
-      background-position: center;
-      background-repeat: no-repeat;
       background-color: #173e31;
 
       font: 16px system-ui, sans-serif;
       color: white;
     }
 
-    /* Kein Kasten um den Inhalt */
-    main {
-      box-sizing: border-box;
-      width: min(90vw, 520px);
-      padding: 20px;
+    /* Titel und Beschreibung oberhalb des Bildes */
+    .intro {
       text-align: center;
+      padding: 24px 20px 16px;
     }
 
-    h1 {
-      margin-top: 0;
+    .intro h1 {
+      margin: 0 0 14px;
       line-height: 1.5;
     }
 
-    /* Klassische Texthinterlegung */
+    .intro p {
+      margin: 0;
+      line-height: 1.7;
+    }
+
+    /* Weihnachtsbild als eigener Bereich */
+    .bildbereich {
+      position: relative;
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .bildbereich img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    /* Auslosung mittig über dem Bild */
+    main {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+
+      box-sizing: border-box;
+      width: min(90%, 520px);
+      text-align: center;
+    }
+
+    /* Oldschool-Texthinterlegung */
     .highlight {
       color: white;
-      background-color: rgba(0, 0, 0, 0.7);
+      background-color: rgba(0, 0, 0, 0.75);
+
       padding: 0;
       border-radius: 0;
 
@@ -48,8 +72,8 @@
     }
 
     #result {
-      margin-top: 25px;
       font-size: 1.3rem;
+      line-height: 1.7;
     }
 
     #result p {
@@ -67,13 +91,38 @@
     footer {
       margin-top: 25px;
       font-size: 0.85rem;
+      line-height: 1.7;
+    }
+
+    /* Anpassungen für kleine Bildschirme */
+    @media (max-width: 600px) {
+      .intro {
+        padding-top: 18px;
+      }
+
+      .intro h1 {
+        font-size: 1.5rem;
+      }
+
+      #result {
+        font-size: 1rem;
+      }
+
+      #result strong {
+        font-size: 1.5rem;
+      }
+
+      footer {
+        margin-top: 15px;
+      }
     }
   </style>
 </head>
 
 <body>
-  <main>
 
+  <!-- Titel oberhalb des Bildes -->
+  <header class="intro">
     <h1>
       <span class="highlight">🎄 Engerl & Bengerl</span>
     </h1>
@@ -83,21 +132,33 @@
         Hier erfährst du, für welchen Lappen du dieses Jahr berappen musst.
       </span>
     </p>
+  </header>
 
-    <div id="result" aria-live="polite">
-      <span class="highlight">
-        Dein Bengerl wird entschlüsselt … 🎁
-      </span>
-    </div>
+  <!-- Weihnachtsbild mit Auslosung -->
+  <div class="bildbereich">
 
-    <footer>
-      <span class="highlight">
-        Viel Freude beim Lappen Wichteln! ✨
-      </span>
-    </footer>
+    <img
+      src="lappenweihnachten.jpeg"
+      alt="Lappenweihnachten"
+    >
 
-  </main>
+    <main>
+      <div id="result" aria-live="polite">
+        <span class="highlight">
+          Dein Bengerl wird entschlüsselt … 🎁
+        </span>
+      </div>
 
+      <footer>
+        <span class="highlight">
+          Viel Freude beim Lappen Wichteln! ✨
+        </span>
+      </footer>
+    </main>
+
+  </div>
+
+  <!-- Verschlüsselte Zuordnungen -->
   <script src="zuweisungen.js"></script>
 
   <script>
@@ -177,7 +238,6 @@
           new TextDecoder().decode(entschluesselt)
         );
 
-        // Alten Inhalt entfernen
         result.replaceChildren();
 
         // Hilfsfunktion für Texthinterlegung
@@ -234,10 +294,8 @@
 
     showBengerl();
 
-    window.addEventListener(
-      "hashchange",
-      showBengerl
-    );
+    window.addEventListener("hashchange", showBengerl);
   </script>
+
 </body>
 </html>
