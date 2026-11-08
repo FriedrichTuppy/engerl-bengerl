@@ -9,62 +9,42 @@
     body {
       margin: 0;
       min-height: 100vh;
-    
       display: grid;
       place-items: center;
-    
+
       background-image: url("lappenweihnachten.jpeg");
       background-size: contain;
       background-position: center;
       background-repeat: no-repeat;
       background-color: #173e31;
+
+      font: 16px system-ui, sans-serif;
+      color: #173e31;
     }
 
     main {
       box-sizing: border-box;
       width: min(90vw, 520px);
       padding: 40px;
-      background: rgba(255, 255, 255, 0);
+      background: rgba(255, 255, 255, 0.7);
       border-radius: 22px;
       box-shadow: 0 12px 42px #173e3120;
+      text-align: center;
     }
 
     h1 {
       margin-top: 0;
     }
 
-    select, button {
-      box-sizing: border-box;
-      width: 100%;
-      padding: 13px;
-      margin-top: 15px;
-      border-radius: 10px;
-      font: inherit;
-    }
-
-    select {
-      border: 1px solid #aabdb3;
-      background: white;
-    }
-
-    button {
-      border: none;
-      background: #176747;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
     #result {
-      margin-top: 20px;
-      text-align: center;
+      margin-top: 25px;
       font-size: 1.3rem;
     }
 
     #result strong {
       display: block;
-      margin-top: 10px;
-      font-size: 1.8rem;
+      margin-top: 12px;
+      font-size: 2rem;
     }
 
     footer {
@@ -81,54 +61,98 @@
 
     <p>Hier erfährst du, für welchen Lappen du dieses Jahr berappen musst.</p>
 
-    <label for="person">Wie heißt du?</label>
-
-    <select id="person">
-      <option value="">Bitte Namen auswählen …</option>
-    </select>
-
-    <button id="reveal">🎁 Mein Bengerl anzeigen</button>
-
-    <div id="result" aria-live="polite"></div>
+    <div id="result" aria-live="polite">
+      Dein Bengerl wird entschlüsselt … 🎁
+    </div>
 
     <footer>Viel Freude beim Lappen Wichteln! ✨</footer>
   </main>
 
-  <!-- Gespeicherte Auslosung laden -->
   <script src="zuweisungen.js"></script>
 
   <script>
-    const select = document.getElementById("person");
     const result = document.getElementById("result");
 
-    if (typeof ZUWEISUNGEN === "undefined") {
-      result.textContent = "Auslosung noch nicht vorhanden.";
-    } else {
-      Object.keys(ZUWEISUNGEN)
-        .sort((a, b) => a.localeCompare(b, "de"))
-        .forEach(name => {
-          const option = document.createElement("option");
-          option.value = name;
-          option.textContent = name;
-          select.append(option);
-        });
+    function fromBase64Url(text) {
+      const base64 = text.replace(/-/g, "+").replace(/_/g, "/");
+      const binary = atob(base64);
+
+      return Uint8Array.from(binary, char => char.charCodeAt(0));
     }
 
-    document.getElementById("reveal").addEventListener("click", () => {
-      result.replaceChildren();
+    async function showBengerl() {
+      try {
+        if (typeof ZUWEISUNGEN === "undefined") {
+          throw new Error("Die Auslosung wurde noch nicht hochgeladen.");
+        }
 
-      if (!select.value) {
-        result.textContent = "Bitte zuerst deinen Namen auswählen.";
-        return;
+        // Linkformat: #Kennung.Schluessel
+        const fragment = location.hash.slice(1);
+        const parts = fragment.split(".");
+
+        if (parts.length !== 2 || !parts[0] || !parts[1]) {
+          throw new Error("Bitte öffne deinen persönlichen Einladungslink.");
+        }
+
+        const [kennung, schluessel] = parts;
+        const eintrag = ZUWEISUNGEN[kennung];
+
+        if (!eintrag) {
+          throw new Error("Dieser Einladungslink ist ungültig.");
+        }
+
+        const keyBytes = fromBase64Url(schluessel);
+
+        if (keyBytes.length !== 32) {
+          throw new Error("Ungültiger Schlüssel.");
+        }
+
+        const key = await crypto.subtle.importKey(
+          "raw",
+          keyBytes,
+          "AES-GCM",
+          false,
+          ["decrypt"]
+        );
+
+        const entschluesselt = await crypto.subtle.decrypt(
+          {
+            name: "AES-GCM",
+            iv: fromBase64Url(eintrag.iv)
+          },
+          key,
+          fromBase64Url(eintrag.daten)
+        );
+
+        const daten = JSON.parse(
+          new TextDecoder().decode(entschluesselt)
+        );
+
+        result.replaceChildren();
+
+        const begruessung = document.createElement("div");
+        begruessung.textContent = `Hallo ${daten.name}! ✨`;
+
+        const beschreibung = document.createElement("p");
+        beschreibung.textContent = "Du beschenkst dieses Jahr:";
+
+        const name = document.createElement("strong");
+        name.textContent = daten.bengerl;
+
+        result.append(begruessung, beschreibung, name);
+
+      } catch (error) {
+        result.textContent =
+          error.message === "Bitte öffne deinen persönlichen Einladungslink." ||
+          error.message === "Die Auslosung wurde noch nicht hochgeladen."
+            ? error.message
+            : "Dieser Link ist ungültig oder konnte nicht entschlüsselt werden.";
       }
+    }
 
-      result.append("✨ Du beschenkst dieses Jahr:");
+    showBengerl();
 
-      const strong = document.createElement("strong");
-      strong.textContent = ZUWEISUNGEN[select.value];
-
-      result.append(strong);
-    });
+    window.addEventListener("hashchange", showBengerl);
   </script>
 </body>
 </html>
