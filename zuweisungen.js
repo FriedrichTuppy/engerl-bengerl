@@ -1,18 +1,18 @@
 const ZUWEISUNGEN = {
-  "h73eG3fzQMwEYYjOTEqkxw": {
-    "iv": "zYswnuopfIpejSoc",
-    "daten": "by7IBL7ZhNBDZQ-WNaaQAglb18KwVZBiMBo4l3FFMyIsqkGUnLDaCT4c6seBnK64"
+  "gYLNINSwlgzd9b78_aHnTQ": {
+    "iv": "WL9qecOyIxFiqcQ_",
+    "daten": "BmULbApHDxvNvDdShvhHLUVToUR8O8hS14O0Q_0R0udYXrzZhWqQJZIJnpoJAvi1xQpUirmiw3yG7CY"
   },
-  "4VRCCSP27N3D_8m0cjs7pA": {
-    "iv": "L7t7I-a7uzjfFQBM",
-    "daten": "1d6IO-sKR_Bi7SAhjf4Nb_IA9HA129kJg_ZRO20pTTI8F9VIsa1MM5te9mIo4fc"
+  "9Lj-Bl7DJuvl8fqfEEt_7g": {
+    "iv": "ybT4BrjA5TOz9Gr2",
+    "daten": "dY6RKNddH-65yRrlWpmZc4B2lIRhMgFea6iOtHbq6VIlviD3m2BOnNPP0smb5p99kQ"
   },
-  "k6CsngpNMZ7K5IiAdhYKrA": {
-    "iv": "KHI39fxN-rxuS3Tk",
-    "daten": "nrXuaaXlNWi7p8ZxerPQTZEw7cX8QNkmG1OyJuT_gVd__CovgGO8QvWx1aW7hmIXhSA"
+  "hrwnxwSfGam04zNd-CCdag": {
+    "iv": "jMGP8SdtQrNegr_X",
+    "daten": "TcLxH83BIx2jvrN7EZ96JEDnSjYnDgcloanQ69bDqK70xpAjYvYxlYnBJJwYAHXKqz2RdkYq2xh1Sw"
   },
-  "IBlxDE53ZQY5yvecjRQ7Sw": {
-    "iv": "qBjUthphJbRFSB-h",
-    "daten": "LQil5w07Nah-5_0GJ6cZHp9fqf1bN0cn_7bntDCDUR2BsiS8AVN-Ej04z0FIjMgqeLBY"
+  "NW_xP7m2hB66wTaog-1u6g": {
+    "iv": "zb67h6SvQmmyW4Jn",
+    "daten": "CTZaKgwLPdYrdxTsvc4TMmqSGQesFsla5ZCC7-BrzalFtPgLK_7EFfs3UUw9BqsZnwXjopSgPu-uVfFdSRyhk4N4Bec"
   }
 };
