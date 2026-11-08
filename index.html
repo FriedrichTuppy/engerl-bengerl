@@ -20,10 +20,10 @@
       background-color: #173e31;
 
       font: 16px system-ui, sans-serif;
-      color: #173e31;
+      color: white;
     }
 
-    /* Keine große weiße Box mehr */
+    /* Kein Kasten um den Inhalt */
     main {
       box-sizing: border-box;
       width: min(90vw, 520px);
@@ -31,51 +31,43 @@
       text-align: center;
     }
 
-    /* Hintergrund nur direkt hinter den Texten */
-    h1,
-    main > p,
-    #result > div,
-    #result > p,
-    #result > strong,
-    footer {
-      background: rgba(255, 245, 220, 0.85);
-      padding: 8px 14px;
-      border-radius: 10px;
-
-      width: fit-content;
-      max-width: 100%;
-      box-sizing: border-box;
-
-      margin-left: auto;
-      margin-right: auto;
-    }
-
     h1 {
       margin-top: 0;
+      line-height: 1.5;
     }
 
-    /* Bereich für die Entschlüsselung */
+    /* Klassische Texthinterlegung */
+    .highlight {
+      color: white;
+      background-color: black;
+
+      padding: 0;
+      border-radius: 0;
+
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+    }
+
     #result {
       margin-top: 25px;
       font-size: 1.3rem;
     }
 
-    /* Hintergrund für den anfänglichen Ladetext */
-    #result:empty {
-      display: none;
+    #result p {
+      margin: 15px 0;
     }
 
-    /* Name des Bengerls */
     #result strong {
-      display: table;
-      margin: 12px auto 0;
+      display: block;
+      margin-top: 12px;
       font-size: 2rem;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
     }
 
     footer {
       margin-top: 25px;
       font-size: 0.85rem;
-      color: #62736a;
     }
   </style>
 </head>
@@ -83,30 +75,35 @@
 <body>
   <main>
 
-    <h1>🎄 Engerl & Bengerl</h1>
+    <h1>
+      <span class="highlight">🎄 Engerl & Bengerl</span>
+    </h1>
 
     <p>
-      Hier erfährst du, für welchen Lappen
-      du dieses Jahr berappen musst.
+      <span class="highlight">
+        Hier erfährst du, für welchen Lappen du dieses Jahr berappen musst.
+      </span>
     </p>
 
     <div id="result" aria-live="polite">
-      <div>Dein Bengerl wird entschlüsselt … 🎁</div>
+      <span class="highlight">
+        Dein Bengerl wird entschlüsselt … 🎁
+      </span>
     </div>
 
     <footer>
-      Viel Freude beim Lappen Wichteln! ✨
+      <span class="highlight">
+        Viel Freude beim Lappen Wichteln! ✨
+      </span>
     </footer>
 
   </main>
 
-  <!-- Verschlüsselte Zuordnungen -->
   <script src="zuweisungen.js"></script>
 
   <script>
     const result = document.getElementById("result");
 
-    // Base64URL in Bytes umwandeln
     function fromBase64Url(text) {
       const base64 = text
         .replace(/-/g, "+")
@@ -120,7 +117,6 @@
       );
     }
 
-    // Persönlichen Link entschlüsseln
     async function showBengerl() {
       try {
         if (typeof ZUWEISUNGEN === "undefined") {
@@ -144,7 +140,6 @@
         }
 
         const [kennung, schluessel] = parts;
-
         const eintrag = ZUWEISUNGEN[kennung];
 
         if (!eintrag) {
@@ -183,30 +178,35 @@
           new TextDecoder().decode(entschluesselt)
         );
 
-        // Bisherigen Inhalt entfernen
+        // Alten Inhalt entfernen
         result.replaceChildren();
 
-        // Begrüßung
-        const begruessung =
-          document.createElement("div");
+        // Hilfsfunktion für Texthinterlegung
+        function highlight(text) {
+          const span = document.createElement("span");
+          span.className = "highlight";
+          span.textContent = text;
+          return span;
+        }
 
-        begruessung.textContent =
-          `Hallo ${daten.name}! ✨`;
+        // Begrüßung
+        const begruessung = document.createElement("div");
+        begruessung.append(
+          highlight(`Hallo ${daten.name}! ✨`)
+        );
 
         // Beschreibung
-        const beschreibung =
-          document.createElement("p");
-
-        beschreibung.textContent =
-          "Du beschenkst dieses Jahr:";
+        const beschreibung = document.createElement("p");
+        beschreibung.append(
+          highlight("Du beschenkst dieses Jahr:")
+        );
 
         // Name des Bengerls
-        const name =
-          document.createElement("strong");
+        const name = document.createElement("strong");
+        name.append(
+          highlight(daten.bengerl)
+        );
 
-        name.textContent = daten.bengerl;
-
-        // Alles anzeigen
         result.append(
           begruessung,
           beschreibung,
@@ -218,7 +218,8 @@
 
         result.replaceChildren();
 
-        const meldung = document.createElement("div");
+        const meldung = document.createElement("span");
+        meldung.className = "highlight";
 
         meldung.textContent =
           error.message ===
@@ -232,10 +233,8 @@
       }
     }
 
-    // Beim Laden entschlüsseln
     showBengerl();
 
-    // Auch bei einem Linkwechsel aktualisieren
     window.addEventListener(
       "hashchange",
       showBengerl
