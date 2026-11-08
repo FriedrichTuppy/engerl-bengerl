@@ -142,12 +142,9 @@
         result.append(begruessung, beschreibung, name);
 
       } catch (error) {
-        result.textContent =
-          error.message === "Bitte öffne deinen persönlichen Einladungslink." ||
-          error.message === "Die Auslosung wurde noch nicht hochgeladen."
-            ? error.message
-            : "Dieser Link ist ungültig oder konnte nicht entschlüsselt werden.";
-      }
+  result.textContent = "Fehler: " + error.name + " – " + error.message;
+  console.error(error);
+}
     }
 
     showBengerl();
