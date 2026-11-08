@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <title>🎄 Engerl & Bengerl</title>
 
   <style>
@@ -22,34 +23,58 @@
       color: #173e31;
     }
 
+    /* Keine große weiße Box mehr */
     main {
       box-sizing: border-box;
       width: min(90vw, 520px);
-      padding: 40px;
-      background: rgba(255, 255, 255, 0.7);
-      border-radius: 22px;
-      box-shadow: 0 12px 42px #173e3120;
+      padding: 20px;
       text-align: center;
+    }
+
+    /* Hintergrund nur direkt hinter den Texten */
+    h1,
+    main > p,
+    #result > div,
+    #result > p,
+    #result > strong,
+    footer {
+      background: rgba(255, 245, 220, 0.85);
+      padding: 8px 14px;
+      border-radius: 10px;
+
+      width: fit-content;
+      max-width: 100%;
+      box-sizing: border-box;
+
+      margin-left: auto;
+      margin-right: auto;
     }
 
     h1 {
       margin-top: 0;
     }
 
+    /* Bereich für die Entschlüsselung */
     #result {
       margin-top: 25px;
       font-size: 1.3rem;
     }
 
+    /* Hintergrund für den anfänglichen Ladetext */
+    #result:empty {
+      display: none;
+    }
+
+    /* Name des Bengerls */
     #result strong {
-      display: block;
-      margin-top: 12px;
+      display: table;
+      margin: 12px auto 0;
       font-size: 2rem;
     }
 
     footer {
       margin-top: 25px;
-      font-size: .85rem;
+      font-size: 0.85rem;
       color: #62736a;
     }
   </style>
@@ -57,48 +82,75 @@
 
 <body>
   <main>
+
     <h1>🎄 Engerl & Bengerl</h1>
 
-    <p>Hier erfährst du, für welchen Lappen du dieses Jahr berappen musst.</p>
+    <p>
+      Hier erfährst du, für welchen Lappen
+      du dieses Jahr berappen musst.
+    </p>
 
     <div id="result" aria-live="polite">
-      Dein Bengerl wird entschlüsselt … 🎁
+      <div>Dein Bengerl wird entschlüsselt … 🎁</div>
     </div>
 
-    <footer>Viel Freude beim Lappen Wichteln! ✨</footer>
+    <footer>
+      Viel Freude beim Lappen Wichteln! ✨
+    </footer>
+
   </main>
 
+  <!-- Verschlüsselte Zuordnungen -->
   <script src="zuweisungen.js"></script>
 
   <script>
     const result = document.getElementById("result");
 
+    // Base64URL in Bytes umwandeln
     function fromBase64Url(text) {
-      const base64 = text.replace(/-/g, "+").replace(/_/g, "/");
+      const base64 = text
+        .replace(/-/g, "+")
+        .replace(/_/g, "/");
+
       const binary = atob(base64);
 
-      return Uint8Array.from(binary, char => char.charCodeAt(0));
+      return Uint8Array.from(
+        binary,
+        char => char.charCodeAt(0)
+      );
     }
 
+    // Persönlichen Link entschlüsseln
     async function showBengerl() {
       try {
         if (typeof ZUWEISUNGEN === "undefined") {
-          throw new Error("Die Auslosung wurde noch nicht hochgeladen.");
+          throw new Error(
+            "Die Auslosung wurde noch nicht hochgeladen."
+          );
         }
 
         // Linkformat: #Kennung.Schluessel
         const fragment = location.hash.slice(1);
         const parts = fragment.split(".");
 
-        if (parts.length !== 2 || !parts[0] || !parts[1]) {
-          throw new Error("Bitte öffne deinen persönlichen Einladungslink.");
+        if (
+          parts.length !== 2 ||
+          !parts[0] ||
+          !parts[1]
+        ) {
+          throw new Error(
+            "Bitte öffne deinen persönlichen Einladungslink."
+          );
         }
 
         const [kennung, schluessel] = parts;
+
         const eintrag = ZUWEISUNGEN[kennung];
 
         if (!eintrag) {
-          throw new Error("Dieser Einladungslink ist ungültig.");
+          throw new Error(
+            "Dieser Einladungslink ist ungültig."
+          );
         }
 
         const keyBytes = fromBase64Url(schluessel);
@@ -107,6 +159,7 @@
           throw new Error("Ungültiger Schlüssel.");
         }
 
+        // AES-Schlüssel importieren
         const key = await crypto.subtle.importKey(
           "raw",
           keyBytes,
@@ -115,41 +168,78 @@
           ["decrypt"]
         );
 
-        const entschluesselt = await crypto.subtle.decrypt(
-          {
-            name: "AES-GCM",
-            iv: fromBase64Url(eintrag.iv)
-          },
-          key,
-          fromBase64Url(eintrag.daten)
-        );
+        // Zuordnung entschlüsseln
+        const entschluesselt =
+          await crypto.subtle.decrypt(
+            {
+              name: "AES-GCM",
+              iv: fromBase64Url(eintrag.iv)
+            },
+            key,
+            fromBase64Url(eintrag.daten)
+          );
 
         const daten = JSON.parse(
           new TextDecoder().decode(entschluesselt)
         );
 
+        // Bisherigen Inhalt entfernen
         result.replaceChildren();
 
-        const begruessung = document.createElement("div");
-        begruessung.textContent = `Hallo ${daten.name}! ✨`;
+        // Begrüßung
+        const begruessung =
+          document.createElement("div");
 
-        const beschreibung = document.createElement("p");
-        beschreibung.textContent = "Du beschenkst dieses Jahr:";
+        begruessung.textContent =
+          `Hallo ${daten.name}! ✨`;
 
-        const name = document.createElement("strong");
+        // Beschreibung
+        const beschreibung =
+          document.createElement("p");
+
+        beschreibung.textContent =
+          "Du beschenkst dieses Jahr:";
+
+        // Name des Bengerls
+        const name =
+          document.createElement("strong");
+
         name.textContent = daten.bengerl;
 
-        result.append(begruessung, beschreibung, name);
+        // Alles anzeigen
+        result.append(
+          begruessung,
+          beschreibung,
+          name
+        );
 
       } catch (error) {
-  result.textContent = "Fehler: " + error.name + " – " + error.message;
-  console.error(error);
-}
+        console.error(error);
+
+        result.replaceChildren();
+
+        const meldung = document.createElement("div");
+
+        meldung.textContent =
+          error.message ===
+            "Bitte öffne deinen persönlichen Einladungslink." ||
+          error.message ===
+            "Die Auslosung wurde noch nicht hochgeladen."
+            ? error.message
+            : "Dieser Link ist ungültig oder konnte nicht entschlüsselt werden.";
+
+        result.append(meldung);
+      }
     }
 
+    // Beim Laden entschlüsseln
     showBengerl();
 
-    window.addEventListener("hashchange", showBengerl);
+    // Auch bei einem Linkwechsel aktualisieren
+    window.addEventListener(
+      "hashchange",
+      showBengerl
+    );
   </script>
 </body>
 </html>
